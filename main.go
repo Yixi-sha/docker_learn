@@ -1,14 +1,14 @@
 package main
 
 import (
-	"log"
-	"github.com/urfave/cli"
-	"os"
+	_ "./nsenter"
 	"fmt"
+	"github.com/urfave/cli"
+	"log"
+	"os"
 )
 
-
-func main(){
+func main() {
 	app := cli.NewApp()
 	app.Name = "mydocker"
 	app.Usage = usage
@@ -17,14 +17,19 @@ func main(){
 	app.Commands = []*cli.Command{
 		&initCommand,
 		&runCommand,
+		&commmitCommand,
+		&listCommand,
+		&logCommand,
+		&execCommand,
+		&stopCommand,
 	}
-	
-	app.Before = func(context *cli.Context) error{
+
+	app.Before = func(context *cli.Context) error {
 		log.Println("before")
 		return nil
 	}
 
-	if err := app.Run(os.Args); err != nil{
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
