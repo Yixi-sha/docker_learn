@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"../cgroup"
 )
 
 func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
@@ -88,4 +89,25 @@ func StopContainer(containerName string) {
 		log.Println(err)
 	}
 	fmt.Println("end")
+}
+
+func RemoveContainer(containerName string){
+	containerInfo, err := GetContainerInfobyName(containerName)
+	if err != nil{
+		log.Println(err)
+		return
+	}
+
+	if containerInfo.Status != STOP{
+		log.Println("state is not ", STOP)
+		return
+	}
+	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	if err := os.RemoveAll(dirURL); err != nil{
+		log.Println(err)
+		return
+	}
+	DeleteWorkSpace(containerInfo.RootURL, containerInfo.MntURL, containerInfo.Volume)
+	cgroupManager := cgroup.NewCgroupManager("mydocker"+containerInfo.Name)
+	cgroupManager.Destroy()
 }

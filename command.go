@@ -156,3 +156,15 @@ var stopCommand = cli.Command{
 		return nil
 	},
 }
+
+var removeCommand = cli.Command{
+	Name:  "remove",
+	Usage: "remove a container",
+	Action: func(context *cli.Context) error{
+		if context.NArg() < 1 {
+			return fmt.Errorf("miss container name")
+		}
+		container.RemoveContainer(context.Args().Get(0))
+		return nil
+	},
+}

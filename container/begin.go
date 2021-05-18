@@ -11,11 +11,12 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File, string, string, string) {
 	readPipe, writePipe, err := NewPipe()
+	var RootURL string = "/home/winks/work/expore/docker/mydocker/test/"
 	if err != nil {
 		log.Println("new pipe error %v", err)
-		return nil, nil
+		return nil, nil, "", "", ""
 	}
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -30,12 +31,12 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
 		if err := os.MkdirAll(dirURL, 0622); err != nil {
 			log.Println(err)
-			return nil, nil
+			return nil, nil, "", "", ""
 		}
 		stdLogFile, err := os.Create(dirURL + "/" + LogFile)
 		if err != nil {
 			log.Println(err)
-			return nil, nil
+			return nil, nil, "", "", ""
 		}
 		cmd.Stdout = stdLogFile
 	}
@@ -44,7 +45,7 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 	mntURL := RootURL + "mnt/"
 	NewWorkSpace(RootURL, mntURL, volume)
 	cmd.Dir = mntURL
-	return cmd, writePipe
+	return cmd, writePipe, RootURL, mntURL, volume
 }
 
 func NewPipe() (*os.File, *os.File, error) {

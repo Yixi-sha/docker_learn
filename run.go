@@ -17,7 +17,7 @@ func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume stri
 	if containerName == "" {
 		containerName = id
 	}
-	parent, writePipe := container.NewParentProcess(tty, volume, containerName)
+	parent, writePipe, rootURL, mntURL, volume := container.NewParentProcess(tty, volume, containerName)
 
 	if parent == nil {
 		log.Println("new parent process error")
@@ -27,22 +27,22 @@ func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume stri
 		log.Fatal(err)
 	}
 
-	containerName, err := container.RecordContainerInfo(id, parent.Process.Pid, comArray, containerName)
+	containerName, err := container.RecordContainerInfo(id, parent.Process.Pid, comArray, containerName, rootURL, mntURL, volume)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	log.Println(comArray, os.Getpid(), parent.Process.Pid)
-	cgroupManager := cgroup.NewCgroupManager("mydocker")
-	defer cgroupManager.Destroy()
+	cgroupManager := cgroup.NewCgroupManager("mydocker"+containerName)
 
 	_ = cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)
 	sendInitCommand(comArray, writePipe)
 	if tty {
 		parent.Wait()
-		container.DeleteWorkSpace(container.RootURL, container.RootURL+"mnt/", volume)
+		container.DeleteWorkSpace(rootURL, rootURL + "mnt/", volume)
 		container.DeleteContainerInfo(containerName)
+		cgroupManager.Destroy()
 	}
 
 	//os.Exit(0)

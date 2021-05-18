@@ -7,9 +7,14 @@ import (
 	"os/exec"
 )
 
-func commmitContainer(imageName string) {
-	mntURL := container.RootURL + "mnt/"
-	imageTar := container.RootURL + imageName + ".tar"
+func commmitContainer(containerName string) {
+	conatinerInfo, err:= container.GetContainerInfobyName(containerName)
+	if err != nil{
+		log.Println(err)
+		return
+	}
+	mntURL := conatinerInfo.RootURL + "mnt/"
+	imageTar := conatinerInfo.RootURL + containerName + ".tar"
 	fmt.Printf("%s\n", imageTar)
 	if _, err := exec.Command("tar", "-czf", imageTar, "-C", mntURL, ".").CombinedOutput(); err != nil {
 		log.Fatal(err)

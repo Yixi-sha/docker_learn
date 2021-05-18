@@ -1,7 +1,5 @@
 package container
 
-const RootURL string = "/home/winks/work/expore/docker/mydocker/test/"
-
 type ContainerInfo struct {
 	Pid         string `json:"pid"`
 	Id          string `json:"id"`
@@ -9,6 +7,9 @@ type ContainerInfo struct {
 	Command     string `json:"command"`
 	CreatedTime string `json:"createTime"`
 	Status      string `json:"status"`
+	RootURL     string `json:"rootURL"`
+	MntURL      string `json:"mntURL"`
+	Volume      string `json:"volume"`
 }
 
 var (
