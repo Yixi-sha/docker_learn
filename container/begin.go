@@ -13,7 +13,7 @@ import (
 
 func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File, string, string, string) {
 	readPipe, writePipe, err := NewPipe()
-	var RootURL string = "/home/winks/work/expore/docker/mydocker/test/"
+	var RootURL string = "/home/ccgo/work/docker/mydocker/test/"
 	if err != nil {
 		log.Println("new pipe error %v", err)
 		return nil, nil, "", "", ""
@@ -42,8 +42,8 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 	}
 
 	cmd.ExtraFiles = []*os.File{readPipe} //keep open in file fd is 3 + i
-	mntURL := RootURL + "mnt/"
-	NewWorkSpace(RootURL, mntURL, volume)
+	mntURL := RootURL + "mnt/" + containerName + "/"
+	NewWorkSpace(RootURL, mntURL, volume, containerName)
 	cmd.Dir = mntURL
 	return cmd, writePipe, RootURL, mntURL, volume
 }
@@ -139,14 +139,22 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func CreateReadOnlyLayer(rootURL string) {
-	busyboxURL := rootURL + "busybox/"
+func CreateReadOnlyLayer(rootURL, containerName string) {
+	busyboxURL := rootURL + containerName + "/"
 	exist, err := PathExists(busyboxURL)
 	if err != nil {
 		log.Printf("Fail to judge whether dir is %s exist, %v\n", busyboxURL, err)
 	}
 	if exist == false {
-		busyboxTarURL := rootURL + "busybox.tar"
+		busyboxTarURL := rootURL + containerName + ".tar"
+		exist, err = PathExists(busyboxTarURL)
+		if err != nil{
+			log.Println(err)
+		}
+		if exist == false{
+			busyboxTarURL = rootURL + "busybox.tar"
+		}
+		
 		if err := os.Mkdir(busyboxURL, 0777); err != nil {
 			log.Fatal("os.Mkdir err ", busyboxURL)
 		}
@@ -156,22 +164,22 @@ func CreateReadOnlyLayer(rootURL string) {
 	}
 }
 
-func CreateWriteLayer(rootURL string) {
-	writeURL := rootURL + "writeLayer/"
-	if err := os.Mkdir(writeURL, 0777); err != nil {
+func CreateWriteLayer(rootURL, containerName string) {
+	writeURL := rootURL + "writeLayer/" + containerName + "/"
+	if err := os.MkdirAll(writeURL, 0777); err != nil {
 		if os.IsNotExist(err) {
 			log.Fatal(err)
 		}
 	}
 }
 
-func CreateMountPoint(rootURL string, mntURL string) {
-	if err := os.Mkdir(mntURL, 0777); err != nil {
+func CreateMountPoint(rootURL, mntURL, containerName string) {
+	if err := os.MkdirAll(mntURL, 0777); err != nil {
 		if os.IsNotExist(err) {
 			log.Fatal(err)
 		}
 	}
-	dirs := "dirs=" + rootURL + "writeLayer:" + rootURL + "busybox"
+	dirs := "dirs=" + rootURL + "writeLayer/" + containerName + ":" + rootURL + containerName
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntURL)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -205,10 +213,10 @@ func MountVolume(mntURL string, volumeURLs []string) {
 	}
 }
 
-func NewWorkSpace(rootURL, mntURL string, volume string) {
-	CreateReadOnlyLayer(rootURL)
-	CreateWriteLayer(rootURL)
-	CreateMountPoint(rootURL, mntURL)
+func NewWorkSpace(rootURL, mntURL, volume, containerName string) {
+	CreateReadOnlyLayer(rootURL, containerName)
+	CreateWriteLayer(rootURL, containerName)
+	CreateMountPoint(rootURL, mntURL, containerName)
 
 	if volume != "" {
 		volumeURLs := strings.Split(volume, ":")

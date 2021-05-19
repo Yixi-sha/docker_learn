@@ -13,7 +13,7 @@ import (
 	"../cgroup"
 )
 
-func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
+func DeleteWorkSpace(rootURL string, mntURL string, volume string, containerName string) {
 	if volume != "" {
 		volumeURLs := strings.Split(volume, ":")
 		if len(volumeURLs) == 2 && volumeURLs[0] != "" && volumeURLs[1] != "" {
@@ -24,7 +24,10 @@ func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
 		}
 	}
 	DeleteMountPoint(mntURL)
-	DeleteWriteLayer(rootURL)
+	DeleteWriteLayer(rootURL, containerName)
+	if err := os.RemoveAll(rootURL + containerName); err != nil {
+		log.Fatal(err)
+	} 
 }
 
 func DeleteVolumeMount(mntURL string, volumeURLs []string) {
@@ -50,8 +53,8 @@ func DeleteMountPoint(mntURL string) {
 	}
 }
 
-func DeleteWriteLayer(rootURL string) {
-	writeURL := rootURL + "writeLayer"
+func DeleteWriteLayer(rootURL, containerName  string) {
+	writeURL := rootURL + "writeLayer/" + containerName
 	if err := os.RemoveAll(writeURL); err != nil {
 		log.Fatal(err)
 	}
@@ -107,7 +110,7 @@ func RemoveContainer(containerName string){
 		log.Println(err)
 		return
 	}
-	DeleteWorkSpace(containerInfo.RootURL, containerInfo.MntURL, containerInfo.Volume)
+	DeleteWorkSpace(containerInfo.RootURL, containerInfo.MntURL, containerInfo.Volume, containerInfo.Name)
 	cgroupManager := cgroup.NewCgroupManager("mydocker"+containerInfo.Name)
 	cgroupManager.Destroy()
 }

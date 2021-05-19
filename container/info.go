@@ -22,7 +22,7 @@ func RandStringBytes(n int) string { //confie to n
 	return string(b)
 }
 
-func RecordContainerInfo(id string, containerPid int, commandArray []string, containerName, rootURL, mntURL ,volume string) (string, error) {
+func RecordContainerInfo(id string, containerPid int, commandArray []string, containerName, rootURL, mntURL ,volume string) (*ContainerInfo, error) {
 	createTime := time.Now().Format("2020-01-02 15:04:05")
 	command := strings.Join(commandArray, "")
 
@@ -40,13 +40,13 @@ func RecordContainerInfo(id string, containerPid int, commandArray []string, con
 
 	jsonByte, err := json.Marshal(containerInfo)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	jsonStr := string(jsonByte)
 
 	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
 	if err := os.MkdirAll(dirUrl, 0622); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	fileName := dirUrl + "/" + ConfigName
@@ -55,14 +55,14 @@ func RecordContainerInfo(id string, containerPid int, commandArray []string, con
 	defer file.Close()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if _, err := file.WriteString(jsonStr); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return containerName, nil
+	return &containerInfo, nil
 }
 
 func DeleteContainerInfo(containerName string) {
