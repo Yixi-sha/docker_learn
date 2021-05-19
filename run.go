@@ -27,7 +27,7 @@ func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume stri
 		log.Fatal(err)
 	}
 
-	containerName, err := container.RecordContainerInfo(id, parent.Process.Pid, comArray, containerName, rootURL, mntURL, volume)
+	containerInfo, err := container.RecordContainerInfo(id, parent.Process.Pid, comArray, containerName, rootURL, mntURL, volume)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,7 +40,7 @@ func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume stri
 	sendInitCommand(comArray, writePipe)
 	if tty {
 		parent.Wait()
-		container.DeleteWorkSpace(rootURL, rootURL + "mnt/", volume)
+		container.DeleteWorkSpace(containerInfo.RootURL, containerInfo.MntURL, containerInfo.Volume, containerInfo.Name)
 		container.DeleteContainerInfo(containerName)
 		cgroupManager.Destroy()
 	}

@@ -13,10 +13,9 @@ func commmitContainer(containerName string) {
 		log.Println(err)
 		return
 	}
-	mntURL := conatinerInfo.RootURL + "mnt/"
 	imageTar := conatinerInfo.RootURL + containerName + ".tar"
 	fmt.Printf("%s\n", imageTar)
-	if _, err := exec.Command("tar", "-czf", imageTar, "-C", mntURL, ".").CombinedOutput(); err != nil {
+	if _, err := exec.Command("tar", "-czf", imageTar, "-C", conatinerInfo.MntURL, ".").CombinedOutput(); err != nil {
 		log.Fatal(err)
 	}
 }
