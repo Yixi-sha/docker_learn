@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File, string, string, string) {
+func NewParentProcess(tty bool, volume string, containerName string, envSlice []string) (*exec.Cmd, *os.File, string, string, string) {
 	readPipe, writePipe, err := NewPipe()
 	var RootURL string = "/home/ccgo/work/docker/mydocker/test/"
 	if err != nil {
@@ -42,6 +42,7 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 	}
 
 	cmd.ExtraFiles = []*os.File{readPipe} //keep open in file fd is 3 + i
+	cmd.Env = append(os.Environ(), envSlice...)
 	mntURL := RootURL + "mnt/" + containerName + "/"
 	NewWorkSpace(RootURL, mntURL, volume, containerName)
 	cmd.Dir = mntURL
@@ -148,13 +149,13 @@ func CreateReadOnlyLayer(rootURL, containerName string) {
 	if exist == false {
 		busyboxTarURL := rootURL + containerName + ".tar"
 		exist, err = PathExists(busyboxTarURL)
-		if err != nil{
+		if err != nil {
 			log.Println(err)
 		}
-		if exist == false{
+		if exist == false {
 			busyboxTarURL = rootURL + "busybox.tar"
 		}
-		
+
 		if err := os.Mkdir(busyboxURL, 0777); err != nil {
 			log.Fatal("os.Mkdir err ", busyboxURL)
 		}

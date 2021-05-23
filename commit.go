@@ -8,8 +8,8 @@ import (
 )
 
 func commmitContainer(containerName string) {
-	conatinerInfo, err:= container.GetContainerInfobyName(containerName)
-	if err != nil{
+	conatinerInfo, err := container.GetContainerInfobyName(containerName)
+	if err != nil {
 		log.Println(err)
 		return
 	}

@@ -1,6 +1,7 @@
 package container
 
 import (
+	"../cgroup"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"../cgroup"
 )
 
 func DeleteWorkSpace(rootURL string, mntURL string, volume string, containerName string) {
@@ -27,7 +27,7 @@ func DeleteWorkSpace(rootURL string, mntURL string, volume string, containerName
 	DeleteWriteLayer(rootURL, containerName)
 	if err := os.RemoveAll(rootURL + containerName); err != nil {
 		log.Fatal(err)
-	} 
+	}
 }
 
 func DeleteVolumeMount(mntURL string, volumeURLs []string) {
@@ -53,7 +53,7 @@ func DeleteMountPoint(mntURL string) {
 	}
 }
 
-func DeleteWriteLayer(rootURL, containerName  string) {
+func DeleteWriteLayer(rootURL, containerName string) {
 	writeURL := rootURL + "writeLayer/" + containerName
 	if err := os.RemoveAll(writeURL); err != nil {
 		log.Fatal(err)
@@ -94,23 +94,23 @@ func StopContainer(containerName string) {
 	fmt.Println("end")
 }
 
-func RemoveContainer(containerName string){
+func RemoveContainer(containerName string) {
 	containerInfo, err := GetContainerInfobyName(containerName)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	if containerInfo.Status != STOP{
+	if containerInfo.Status != STOP {
 		log.Println("state is not ", STOP)
 		return
 	}
 	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
-	if err := os.RemoveAll(dirURL); err != nil{
+	if err := os.RemoveAll(dirURL); err != nil {
 		log.Println(err)
 		return
 	}
 	DeleteWorkSpace(containerInfo.RootURL, containerInfo.MntURL, containerInfo.Volume, containerInfo.Name)
-	cgroupManager := cgroup.NewCgroupManager("mydocker"+containerInfo.Name)
+	cgroupManager := cgroup.NewCgroupManager("mydocker" + containerInfo.Name)
 	cgroupManager.Destroy()
 }

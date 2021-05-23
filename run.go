@@ -12,12 +12,12 @@ import (
 
 const usage = `mydocker is simple container`
 
-func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume string, containerName string) {
+func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume string, containerName string, envSlice []string) {
 	id := container.RandStringBytes(10)
 	if containerName == "" {
 		containerName = id
 	}
-	parent, writePipe, rootURL, mntURL, volume := container.NewParentProcess(tty, volume, containerName)
+	parent, writePipe, rootURL, mntURL, volume := container.NewParentProcess(tty, volume, containerName, envSlice)
 
 	if parent == nil {
 		log.Println("new parent process error")
@@ -33,7 +33,7 @@ func Run(tty bool, comArray []string, res *subsystem.ResourceConfig, volume stri
 	}
 
 	log.Println(comArray, os.Getpid(), parent.Process.Pid)
-	cgroupManager := cgroup.NewCgroupManager("mydocker"+containerName)
+	cgroupManager := cgroup.NewCgroupManager("mydocker" + containerName)
 
 	_ = cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)

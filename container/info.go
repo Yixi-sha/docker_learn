@@ -22,7 +22,7 @@ func RandStringBytes(n int) string { //confie to n
 	return string(b)
 }
 
-func RecordContainerInfo(id string, containerPid int, commandArray []string, containerName, rootURL, mntURL ,volume string) (*ContainerInfo, error) {
+func RecordContainerInfo(id string, containerPid int, commandArray []string, containerName, rootURL, mntURL, volume string) (*ContainerInfo, error) {
 	createTime := time.Now().Format("2020-01-02 15:04:05")
 	command := strings.Join(commandArray, "")
 

@@ -43,6 +43,10 @@ var runCommand = cli.Command{
 			Name:  "name",
 			Usage: "container name",
 		},
+		&cli.StringSliceFlag{
+			Name:  "e",
+			Usage: "set enviroment",
+		},
 	},
 
 	Action: func(context *cli.Context) error {
@@ -65,7 +69,8 @@ var runCommand = cli.Command{
 		}
 		volume := context.String("v")
 		containerName := context.String("name")
-		Run(tty, cmdArray, resConf, volume, containerName)
+		envSlice := context.StringSlice("e")
+		Run(tty, cmdArray, resConf, volume, containerName, envSlice)
 		return nil
 	},
 }
@@ -160,7 +165,7 @@ var stopCommand = cli.Command{
 var removeCommand = cli.Command{
 	Name:  "remove",
 	Usage: "remove a container",
-	Action: func(context *cli.Context) error{
+	Action: func(context *cli.Context) error {
 		if context.NArg() < 1 {
 			return fmt.Errorf("miss container name")
 		}
