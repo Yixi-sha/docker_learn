@@ -1,13 +1,16 @@
 package main
 
 import (
-	"./cgroup/subsystem"
-	"./container"
-	"./nsenter"
 	"fmt"
-	"github.com/urfave/cli"
 	"log"
 	"os"
+
+	"mydocker/cgroup/subsystem"
+	"mydocker/container"
+	"mydocker/network"
+	"mydocker/nsenter"
+
+	"github.com/urfave/cli"
 )
 
 var runCommand = cli.Command{
@@ -171,5 +174,61 @@ var removeCommand = cli.Command{
 		}
 		container.RemoveContainer(context.Args().Get(0))
 		return nil
+	},
+}
+
+var networkCommand = cli.Command{
+	Name:  "network",
+	Usage: "container network commands",
+	Subcommands: []cli.Command{
+		{
+			Name:  "create",
+			Usage: "create a container network",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "driver",
+					Usage: "network driver",
+				},
+				cli.StringFlag{
+					Name:  "subnet",
+					Usage: "subnet cidr",
+				},
+			},
+			Action: func(context *cli.Context) error {
+				if context.NArg() < 1 {
+					return fmt.Errorf("Missing network name")
+				}
+				network.Init()
+				err := network.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args()[0])
+				if err != nil {
+					return fmt.Errorf("create network error: %+v", err)
+				}
+				return nil
+			},
+		},
+		{
+			Name:  "list",
+			Usage: "list container network",
+			Action: func(context *cli.Context) error {
+				network.Init()
+				network.ListNetwork()
+				return nil
+			},
+		},
+		{
+			Name:  "remove",
+			Usage: "remove container network",
+			Action: func(context *cli.Context) error {
+				if context.NArg() < 1 {
+					return fmt.Errorf("Missing network name")
+				}
+				network.Init()
+				err := network.DeleteNetwork(context.Args()[0])
+				if err != nil {
+					return fmt.Errorf("remove network error: %+v", err)
+				}
+				return nil
+			},
+		},
 	},
 }

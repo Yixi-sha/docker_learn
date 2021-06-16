@@ -1,13 +1,14 @@
 package nsenter
 
 import (
-	"../container"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"mydocker/container"
 )
 
 const ENV_EXEC_PID = "mydocker_pid"

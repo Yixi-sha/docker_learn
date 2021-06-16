@@ -1,7 +1,6 @@
 package container
 
 import (
-	"../cgroup"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"mydocker/cgroup"
 )
 
 func DeleteWorkSpace(rootURL string, mntURL string, volume string, containerName string) {

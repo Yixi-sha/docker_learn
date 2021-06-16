@@ -1,13 +1,14 @@
 package main
 
 import (
-	"./cgroup"
-	"./cgroup/subsystem"
-	"./container"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+
+	"mydocker/cgroup"
+	"mydocker/cgroup/subsystem"
+	"mydocker/container"
 )
 
 const usage = `mydocker is simple container`

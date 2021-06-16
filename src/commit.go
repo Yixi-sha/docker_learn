@@ -1,10 +1,11 @@
 package main
 
 import (
-	"./container"
 	"fmt"
 	"log"
 	"os/exec"
+
+	"mydocker/container"
 )
 
 func commmitContainer(containerName string) {

@@ -1,11 +1,13 @@
 package main
 
 import (
-	_ "./nsenter"
 	"fmt"
-	"github.com/urfave/cli"
 	"log"
 	"os"
+
+	_ "mydocker/nsenter"
+
+	"github.com/urfave/cli"
 )
 
 func main() {
@@ -14,15 +16,16 @@ func main() {
 	app.Usage = usage
 
 	fmt.Println(os.Args)
-	app.Commands = []*cli.Command{
-		&initCommand,
-		&runCommand,
-		&commmitCommand,
-		&listCommand,
-		&logCommand,
-		&execCommand,
-		&stopCommand,
-		&removeCommand,
+	app.Commands = []cli.Command{
+		initCommand,
+		runCommand,
+		commmitCommand,
+		listCommand,
+		logCommand,
+		execCommand,
+		stopCommand,
+		removeCommand,
+		networkCommand,
 	}
 
 	app.Before = func(context *cli.Context) error {
